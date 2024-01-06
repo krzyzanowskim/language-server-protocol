@@ -1,0 +1,3 @@
+add_subdirectory(LanguageServerProtocol)
+add_subdirectory(LanguageServerProtocolJSONRPC)
+add_subdirectory(LSPLogging)
