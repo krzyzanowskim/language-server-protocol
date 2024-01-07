@@ -28,7 +28,7 @@ let package = Package(
   name: "language-server-protocol",
   platforms: [.macOS("12.0")],
   products: [
-    .library(name: "LanguageServerProtocol", targets: ["LanguageServerProtocol"]),
+    .library(name: "LanguageServerProtocol", targets: ["LanguageServerProtocol", "BuildServerProtocol"]),
     .library(name: "LanguageServerProtocolJSONRPC", targets: ["LanguageServerProtocolJSONRPC"]),
   ],
   dependencies: [
@@ -60,6 +60,13 @@ let package = Package(
         "LanguageServerProtocolJSONRPC",
         "LSPTestSupport",
       ]
+    ),
+    .target(
+      name: "BuildServerProtocol",
+      dependencies: [
+        "LanguageServerProtocol"
+      ],
+      exclude: ["CMakeLists.txt"]
     ),
     .target(
       name: "LSPLogging",

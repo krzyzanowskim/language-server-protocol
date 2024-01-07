@@ -21,6 +21,7 @@ git clone git@github.com:apple/sourcekit-lsp.git $CHECKOUT_DIR
 pushd $CHECKOUT_DIR
 # rm -rf -- !(.git)
 cp -R $CHECKOUT_DIR/Sources/LanguageServerProtocol/* $SCRIPT_DIR/../Sources/LanguageServerProtocol
+cp -R $CHECKOUT_DIR/Sources/BuildServerProtocol/* $SCRIPT_DIR/../Sources/BuildServerProtocol
 cp -R $CHECKOUT_DIR/Sources/LanguageServerProtocolJSONRPC/* $SCRIPT_DIR/../Sources/LanguageServerProtocolJSONRPC
 cp -R $CHECKOUT_DIR/Sources/LSPTestSupport/* $SCRIPT_DIR/../Sources/LSPTestSupport
 cp -R $CHECKOUT_DIR/Tests/LanguageServerProtocolJSONRPCTests/* $SCRIPT_DIR/../Tests/LanguageServerProtocolJSONRPCTests
