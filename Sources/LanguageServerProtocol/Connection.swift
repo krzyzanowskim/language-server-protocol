@@ -13,27 +13,27 @@
 import Dispatch
 
 /// An abstract connection, allow messages to be sent to a (potentially remote) `MessageHandler`.
-public protocol Connection: AnyObject {
+public protocol Connection: AnyObject, Sendable {
 
   /// Send a notification without a reply.
   func send(_ notification: some NotificationType)
 
   /// Send a request and (asynchronously) receive a reply.
   func send<Request: RequestType>(
-    _: Request,
-    reply: @escaping (LSPResult<Request.Response>) -> Void
+    _ request: Request,
+    reply: @escaping @Sendable (LSPResult<Request.Response>) -> Void
   ) -> RequestID
 }
 
 /// An abstract message handler, such as a language server or client.
-public protocol MessageHandler: AnyObject {
+public protocol MessageHandler: AnyObject, Sendable {
 
   /// Handle a notification without a reply.
   ///
   /// The method should return as soon as the notification has been sufficiently
   /// handled to avoid out-of-order requests, e.g. once the notification has
   /// been forwarded to clangd.
-  func handle(_ params: some NotificationType, from clientID: ObjectIdentifier)
+  func handle(_ notification: some NotificationType)
 
   /// Handle a request and (asynchronously) receive a reply.
   ///
@@ -42,9 +42,8 @@ public protocol MessageHandler: AnyObject {
   /// request has been sent to sourcekitd. The actual semantic computation
   /// should occur after the method returns and report the result via `reply`.
   func handle<Request: RequestType>(
-    _ params: Request,
+    _ request: Request,
     id: RequestID,
-    from clientID: ObjectIdentifier,
     reply: @escaping (LSPResult<Request.Response>) -> Void
   )
 }
@@ -61,7 +60,9 @@ public protocol MessageHandler: AnyObject {
 /// conn.send(...) // handled by server
 /// conn.close()
 /// ```
-public final class LocalConnection {
+///
+/// - Note: Unchecked sendable conformance because shared state is guarded by `queue`.
+public final class LocalConnection: Connection, @unchecked Sendable {
 
   enum State {
     case ready, started, closed
@@ -102,11 +103,9 @@ public final class LocalConnection {
       return .number(_nextRequestID)
     }
   }
-}
 
-extension LocalConnection: Connection {
   public func send<Notification>(_ notification: Notification) where Notification: NotificationType {
-    self.handler?.handle(notification, from: ObjectIdentifier(self))
+    self.handler?.handle(notification)
   }
 
   public func send<Request: RequestType>(
@@ -121,7 +120,7 @@ extension LocalConnection: Connection {
     }
 
     precondition(self.state == .started)
-    handler.handle(request, id: id, from: ObjectIdentifier(self)) { result in
+    handler.handle(request, id: id) { result in
       reply(result)
     }
 
